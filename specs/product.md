@@ -38,4 +38,44 @@ Look up a Pokémon.
   menu on a card and on the detail screen. It shares a text like "Check out
   Pikachu (#025)!". The alternative was haptics when favoriting; I picked Share
   because it is already in the Figma.
-- **Search**: PokeAPI has no search 
+- **Search**: PokeAPI has no search endpoint, and `/pokemon/{name}` only finds
+  exact names. So the full name list is loaded once (the same request as the
+  list) and filtered on the phone, case-insensitive. One request per keystroke
+  would not find "pika".
+- **Design**: the Figma colours, the type colours and the Rubik font live once
+  in `src/constants/theme.ts`, set up by the first issue (the list). The
+  alternative, styles per screen, drifts apart and makes dark mode impossible.
+
+## Technical core
+
+- [ ] Runs in Expo Go
+- [ ] Live data through TanStack Query
+- [ ] At least 2 screens with Expo Router
+- [ ] Something in SQLite that survives a restart: favorites
+- [ ] Loading and error state on every load
+- [ ] One native feature: Share, in the options menu and on the detail screen
+- [ ] TypeScript and ESLint without errors
+- [ ] UI, data and logic in separate files
+
+## Optional
+
+- [ ] Three different Reanimated animations, each with a purpose
+- [ ] Dark mode: every screen looks right, all colours from the theme
+- [ ] Pagination: page by page while you scroll, not all at once
+- [ ] Clean TypeScript: no `any`, no `as` casts, no `@ts-ignore`
+- [ ] Localization: two languages
+- [ ] No warnings: no `console.log`, none in the terminal or on screen
+- [ ] Offline: works in airplane mode with the last data
+- [ ] Tests: one per feature on the logic, `npm test` passes
+- [ ] CI: lint and tsc on every push
+- [ ] Accessibility: button labels, largest text size
+- [ ] Optimistic update
+
+## Out of scope
+
+- Accounts, login or sync between phones.
+- Battles, moves, items, abilities in detail.
+- Choosing between forms or shiny versions on the detail screen. The list shows every entry the API gives, forms included.
+- Filtering or sorting by type, generation or stat.
+- Other languages than English.
+- A web version.
