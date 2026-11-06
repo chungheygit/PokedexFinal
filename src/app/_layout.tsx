@@ -6,6 +6,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { Fonts } from '@/constants/theme';
+import { ComparePickProvider } from '@/hooks/use-compare-pick';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,11 +31,15 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
       <QueryClientProvider client={queryClient}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          {/* The detail screen draws its own header (← and the name fading in on scroll). */}
-          <Stack.Screen name="pokemon/[id]" options={{ headerShown: false }} />
-        </Stack>
+        <ComparePickProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* The detail screen draws its own header (← and the name fading in on scroll). */}
+            <Stack.Screen name="pokemon/[id]" options={{ headerShown: false }} />
+            {/* Compare draws its own bar too (← and "Compare"). */}
+            <Stack.Screen name="compare" options={{ headerShown: false }} />
+          </Stack>
+        </ComparePickProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

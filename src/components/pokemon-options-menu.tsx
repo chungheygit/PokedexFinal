@@ -3,6 +3,7 @@ import { Share } from 'react-native';
 
 import { HeartIcon } from '@/components/heart-icon';
 import { OptionsMenu, type OptionsMenuItem } from '@/components/options-menu';
+import { useComparePick } from '@/hooks/use-compare-pick';
 import { useIsFavorite, useSetFavorite } from '@/hooks/use-favorites';
 import { getPokemonHref, getShareText } from '@/utils/pokemon';
 
@@ -20,12 +21,13 @@ function sharePokemon(id: number, name: string) {
 }
 
 /**
- * The ⋮ menu of a Pokémon card: Open, Add/Remove favorite, Share. The favorite
+ * The ⋮ menu of a Pokémon card: Open, Add/Remove favorite, Compare, Share. The favorite
  * item is left out while the favorites are loading or failed to load.
  */
 export function PokemonOptionsMenu({ pokemon, visible, onClose }: PokemonOptionsMenuProps) {
   const isFavorite = useIsFavorite(pokemon?.id);
   const setFavorite = useSetFavorite();
+  const { start: startCompare } = useComparePick();
 
   const items: OptionsMenuItem[] = [];
   if (pokemon) {
@@ -44,6 +46,13 @@ export function PokemonOptionsMenu({ pokemon, visible, onClose }: PokemonOptions
         onPress: () => setFavorite({ id, name, favorite: !isFavorite }),
       });
     }
+    items.push({
+      key: 'compare',
+      label: 'Compare',
+      // `compare_arrows` (U+E915) is in the bundled Material Symbols font.
+      icon: { ios: 'arrow.left.arrow.right', android: 'compare_arrows', web: 'compare_arrows' },
+      onPress: () => startCompare({ id, name }),
+    });
     items.push({
       key: 'share',
       label: 'Share',

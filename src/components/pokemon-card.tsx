@@ -23,19 +23,21 @@ export type PokemonCardProps = {
   name: string;
   onPress: (pokemon: { id: number; name: string }) => void;
   onOptionsPress: (pokemon: { id: number; name: string }) => void;
+  /** Half opacity: already chosen as the first Pokémon to compare. The ⋮ still works. */
+  dimmed?: boolean;
 };
 
-function PokemonCardComponent({ id, name, onPress, onOptionsPress }: PokemonCardProps) {
+function PokemonCardComponent({ id, name, onPress, onOptionsPress, dimmed = false }: PokemonCardProps) {
   const theme = useTheme();
   const [spriteFailed, setSpriteFailed] = useState(false);
   const displayName = formatName(name);
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.card }]}>
+    <View style={[styles.card, { backgroundColor: theme.card, opacity: dimmed ? 0.5 : 1 }]}>
       <Pressable
         onPress={() => onPress({ id, name })}
         accessibilityRole="button"
-        accessibilityLabel={`${displayName}, number ${id}`}
+        accessibilityLabel={`${displayName}, number ${id}${dimmed ? ', already chosen to compare' : ''}`}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
         <View style={[styles.top, { backgroundColor: theme.cardTop }]}>
           {spriteFailed ? (

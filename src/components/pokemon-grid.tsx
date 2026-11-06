@@ -21,6 +21,8 @@ type PokemonGridProps = {
   onOptionsPress: PokemonCardProps['onOptionsPress'];
   /** Shown under the title when `data` is empty. */
   emptyText?: string;
+  /** The card shown dimmed: the first Pokémon while picking one to compare. */
+  dimmedId?: number;
   ref?: Ref<FlatList<GridItem>>;
 };
 
@@ -33,7 +35,15 @@ function keyExtractor(item: GridItem) {
  * edges, 16 between cards, every card half a row (also a lone last card).
  * Dragging closes the keyboard; a tap on a card works with the keyboard open.
  */
-export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText, ref }: PokemonGridProps) {
+export function PokemonGrid({
+  data,
+  title,
+  onPress,
+  onOptionsPress,
+  emptyText,
+  dimmedId,
+  ref,
+}: PokemonGridProps) {
   const theme = useTheme();
 
   // Two cards and one gap between the screen edges (390 wide → 163 per card).
@@ -55,10 +65,16 @@ export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText, r
   const renderItem = useCallback(
     ({ item }: { item: GridItem }) => (
       <View style={[styles.cell, { height: cardHeight }]}>
-        <PokemonCard id={item.id} name={item.name} onPress={onPress} onOptionsPress={onOptionsPress} />
+        <PokemonCard
+          id={item.id}
+          name={item.name}
+          onPress={onPress}
+          onOptionsPress={onOptionsPress}
+          dimmed={item.id === dimmedId}
+        />
       </View>
     ),
-    [onPress, onOptionsPress, cardHeight],
+    [onPress, onOptionsPress, cardHeight, dimmedId],
   );
 
   return (
@@ -68,6 +84,7 @@ export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText, r
       numColumns={2}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
+      extraData={dimmedId}
       getItemLayout={getItemLayout}
       ListHeaderComponent={
         title === undefined ? undefined : (

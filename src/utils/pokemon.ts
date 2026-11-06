@@ -11,6 +11,25 @@ export function getPokemonHref(id: number, name: string): Href {
   return { pathname: '/pokemon/[id]', params: { id: String(id), name } };
 }
 
+/**
+ * The compare route for two Pokémon. The slugs let the names show at once,
+ * as the detail's `name` param does.
+ */
+export function getCompareHref(
+  first: { id: number; name: string },
+  second: { id: number; name: string },
+): Href {
+  return {
+    pathname: '/compare',
+    params: {
+      first: String(first.id),
+      firstName: first.name,
+      second: String(second.id),
+      secondName: second.name,
+    },
+  };
+}
+
 /** `https://pokeapi.co/api/v2/pokemon/25/` → `25`. */
 export function getIdFromUrl(url: string): number {
   const match = /\/(\d+)\/?$/.exec(url);

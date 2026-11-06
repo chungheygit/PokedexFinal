@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,20 +11,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { CompareBanner } from '@/components/compare-banner';
 import { ErrorView } from '@/components/error-view';
 import { PokemonGrid } from '@/components/pokemon-grid';
 import { PokemonOptionsMenu } from '@/components/pokemon-options-menu';
 import { SearchField } from '@/components/search-field';
+import { useComparePick } from '@/hooks/use-compare-pick';
 import type { PokemonListItem } from '@/hooks/use-pokemon-list';
+import { usePokemonPress } from '@/hooks/use-pokemon-press';
 import { usePokemonSearch } from '@/hooks/use-pokemon-search';
 import { useTheme } from '@/hooks/use-theme';
-import { getPokemonHref } from '@/utils/pokemon';
 import { normalizeSearchText } from '@/utils/search';
-
-function openPokemon({ id, name }: PokemonListItem) {
-  Keyboard.dismiss();
-  router.push(getPokemonHref(id, name));
-}
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -36,6 +33,8 @@ export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const inputRef = useRef<TextInputInstance>(null);
   const listRef = useRef<FlatList<PokemonListItem>>(null);
+  const { first: compareFirst, cancel: cancelCompare } = useComparePick();
+  const handlePress = usePokemonPress();
 
   const handleOptionsPress = useCallback((pokemon: PokemonListItem) => {
     Keyboard.dismiss();
@@ -66,18 +65,24 @@ export default function HomeScreen() {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [normalizedQuery]);
 
-  // Android back leaves search mode first, only while this tab is on screen.
+  // Android back leaves search mode first, then cancels picking a Pokémon to
+  // compare; only while this tab is on screen. One handler, so the order is fixed.
+  const picking = compareFirst !== null;
   useFocusEffect(
     useCallback(() => {
-      if (!searching) {
+      if (!searching && !picking) {
         return undefined;
       }
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        exitSearch();
+        if (searching) {
+          exitSearch();
+        } else {
+          cancelCompare();
+        }
         return true;
       });
       return () => subscription.remove();
-    }, [searching, exitSearch]),
+    }, [searching, picking, exitSearch, cancelCompare]),
   );
 
   // Switching to another tab closes the keyboard; the search itself stays.
@@ -91,8 +96,9 @@ export default function HomeScreen() {
         data={results}
         title={searching ? undefined : 'All Pokémon'}
         emptyText={`No Pokémon found for "${query.trim()}".`}
-        onPress={openPokemon}
+        onPress={handlePress}
         onOptionsPress={handleOptionsPress}
+        dimmedId={compareFirst?.id}
       />
     );
   } else if (isError) {
@@ -107,6 +113,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
+      <CompareBanner />
       <SearchField
         ref={inputRef}
         value={query}

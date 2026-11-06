@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BACK_BUTTON_SIZE, BackButton } from '@/components/back-button';
 import { ErrorView } from '@/components/error-view';
 import { HeartIcon } from '@/components/heart-icon';
 import { AboutTab } from '@/components/pokemon-detail/about-tab';
@@ -33,17 +33,8 @@ import { getPokemonHref, parsePokemonId } from '@/utils/pokemon';
 import { getDisplayName } from '@/utils/pokemon-detail';
 
 const BAR_HEIGHT = 56;
-const BUTTON_SIZE = 40;
+const BUTTON_SIZE = BACK_BUTTON_SIZE;
 const ICON_SIZE = 24;
-
-function goBack() {
-  // Opened from a deep link there is no screen to go back to: go to the list.
-  if (router.canGoBack()) {
-    router.back();
-  } else {
-    router.replace('/');
-  }
-}
 
 function openPokemon(entry: EvolutionEntry) {
   router.push(getPokemonHref(entry.id, entry.name));
@@ -96,18 +87,7 @@ export default function PokemonDetailScreen() {
         accessibilityElementsHidden>
         {name}
       </Animated.Text>
-      <Pressable
-        onPress={goBack}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={Spacing.two}
-        style={({ pressed }) => [styles.button, { opacity: pressed ? 0.5 : 1 }]}>
-        <SymbolView
-          name={{ ios: 'arrow.left', android: 'arrow_back', web: 'arrow_back' }}
-          size={ICON_SIZE}
-          tintColor={theme.text}
-        />
-      </Pressable>
+      <BackButton />
       {/* Fixed slot: the heart appears once the slug and the favorites are known, without moving anything. */}
       <View style={styles.button}>
         {pokemon && isFavorite !== undefined && (
