@@ -23,7 +23,7 @@ Look up a Pokémon.
 - **Endpoints**:
   - `/pokemon?limit=100000`: name and URL of every Pokémon in one request. For the list and search. The id comes from the URL.
   - `/pokemon/{id}`: types, stats, height, weight, base experience, abilities. For detail and compare.
-  - `/pokemon-species/{id}`: the link to the evolution chain.
+  - The species, through `species.url` from `/pokemon/{id}`: the official name and the link to the evolution chain.
   - `/evolution-chain/{id}`: the evolution chain.
   - Images by id from the PokeAPI sprites repo: the sprite on cards, the official artwork on detail.
 - **Stored on the phone**: table `favorites` in SQLite: `id`, `name`, `created_at`.
@@ -35,9 +35,9 @@ Look up a Pokémon.
   the user makes. SQLite, not AsyncStorage, because I sort favorites by date
   added and check for duplicates on `id`.
 - **Native feature**: Share, with the React Native Share API, in the ⋮ options
-  menu on a card and on the detail screen. It shares a text like "Check out
-  Pikachu (#025)!". The alternative was haptics when favoriting; I picked Share
-  because it is already in the Figma.
+  menu on a card. It shares a text like "Check out Pikachu (#025)!". The
+  alternative was haptics when favoriting; I picked Share because it is already
+  in the Figma (the options menu).
 - **Search**: PokeAPI has no search endpoint, and `/pokemon/{name}` only finds
   exact names. So the full name list is loaded once (the same request as the
   list) and filtered on the phone, case-insensitive. One request per keystroke
@@ -53,7 +53,7 @@ Look up a Pokémon.
 - [ ] At least 2 screens with Expo Router
 - [ ] Something in SQLite that survives a restart: favorites
 - [ ] Loading and error state on every load
-- [ ] One native feature: Share, in the options menu and on the detail screen
+- [ ] One native feature: Share, in the options menu
 - [ ] TypeScript and ESLint without errors
 - [ ] UI, data and logic in separate files
 
