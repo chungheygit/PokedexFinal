@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     color: Brand.link,
   },
   code: {
-    fontFamily: Fonts.mono,
+    fontFamily: Fonts.regular,
     fontWeight: Platform.select({ android: 700 }) ?? 500,
     fontSize: 12,
   },

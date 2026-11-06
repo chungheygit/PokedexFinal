@@ -1,61 +1,48 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
+ * The design system: colours, fonts, spacing and radius, measured from the Figma
+ * screenshots in `specs/design/`. Components read colours through `useTheme()`
+ * and never contain a hex code.
  */
 
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+const palette = {
+  background: '#ECF6FF',
+  cardTop: '#F6F6FF',
+  card: '#FFFFFF',
+  primary: '#5126F5',
+  onPrimary: '#FFFFFF',
+  text: '#111532',
+  textSecondary: '#84838B',
+  backdrop: 'rgba(17, 21, 50, 0.4)',
+} as const;
+
 export const Colors = {
   light: {
-    text: '#22303C',
-    background: '#F5F2EC',
-    card: '#FFFFFF',
-    badge: '#2E7D5B',
-    badgeText: '#FFFFFF',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    ...palette,
+    // Still used by the template leftovers (collapsible, hint-row).
+    backgroundElement: palette.cardTop,
+    backgroundSelected: palette.cardTop,
   },
+  // Dark mode is not designed yet: same values as light for now.
   dark: {
-    text: '#F2F4F5',
-    background: '#171A1D',
-    card: '#202529',
-    badge: '#347A59',
-    badgeText: '#FFFFFF',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    ...palette,
+    backgroundElement: palette.cardTop,
+    backgroundSelected: palette.cardTop,
   },
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+/** Rubik, loaded from `assets/fonts/` in `src/app/_layout.tsx`. */
+export const Fonts = {
+  regular: 'Rubik-Regular',
+  medium: 'Rubik-Medium',
+  semiBold: 'Rubik-SemiBold',
+  bold: 'Rubik-Bold',
+} as const;
 
 export const Spacing = {
   half: 2,
