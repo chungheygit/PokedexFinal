@@ -8,10 +8,13 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
   - Query client: `QueryClientProvider` in `src/app/_layout.tsx`.
   - Theme: colours, spacing and radius in `src/constants/theme.ts`. Never a hex code in a component.
   - Favorite red: `favorite` in the theme palette (`theme.favorite`), for the filled heart.
+  - Shadow: `shadow` in the theme palette, used as ``boxShadow: `0px 2px 12px ${theme.shadow}` `` (the search field).
   - Type colours: `TypeColors` in `theme.ts` (all 18 types); use `getTypeColor(type, theme.textSecondary)` so an unknown type falls back instead of crashing.
   - Error state: `src/components/error-view.tsx`. `onRetry` is optional: leave it out when retrying cannot help (an invalid id).
   - API client: `src/services/pokemon-api.ts` (`API_URL`, `fetchPokemonList`, `fetchPokemon`, `fetchPokemonSpecies`, `fetchEvolutionChain`). Add new PokeAPI calls there, typed with only the fields used.
   - Pokémon list query: `usePokemonList` in `src/hooks/use-pokemon-list.ts`, key `['pokemon', 'list']`, `{ id, name }[]`. Search reuses it.
+  - Search: `usePokemonSearch(query)` in `src/hooks/use-pokemon-search.ts` filters that list on the phone (`{ results, isError, refetch }`, `results` `undefined` while loading or failed). Matching in `src/utils/search.ts`: `normalizeSearchText` (accents folded, lowercase, only a–z 0–9) and `searchPokemon(list, query)` (substring, list order; an empty normalized query returns `list` itself).
+  - Search field: `SearchField` in `src/components/search-field.tsx`, props `{ value, onChangeText, searching, onFocus, onBack, editable, ref }`: search icon or back arrow ("Clear search"), divider line while searching. Search-mode state lives in `src/app/(tabs)/index.tsx`.
   - Detail queries (all `staleTime: Infinity`, `retry: 1`, ids are numbers, `skipToken` while the id is unknown):
     - `usePokemon(id)` in `src/hooks/use-pokemon.ts`, key `['pokemon', id]`, returns `PokemonDetail` (types, stats rows, visible abilities, `speciesId`). Compare can reuse it.
     - `usePokemonSpecies(speciesId)` in `src/hooks/use-pokemon-species.ts`, key `['species', speciesId]`, returns `{ id, name, officialName, chainId }`. The species id comes from `species.url`, never the Pokémon id (forms share their species).
@@ -27,7 +30,7 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
   - Pokémon card: `PokemonCard` in `src/components/pokemon-card.tsx`, props `{ id, name, onPress, onOptionsPress }` (both callbacks get `{ id, name }`), fills its parent's width with a square image part; `getPokemonCardHeight(width)` gives its height for `getItemLayout`.
   - Options menu: `OptionsMenu` in `src/components/options-menu.tsx`, a bottom-sheet `Modal`; render once per screen, pass `items`. An item's `icon` is a symbol name or `({ size, color }) => ReactNode` for a PNG.
   - Pokémon ⋮ menu: `PokemonOptionsMenu` in `src/components/pokemon-options-menu.tsx`, props `{ pokemon, visible, onClose }`: Open / Add or Remove favorite / Share. Use it on every screen with Pokémon cards.
-  - Pokémon grid: `PokemonGrid` in `src/components/pokemon-grid.tsx`, props `{ data, title, onPress, onOptionsPress, emptyText? }`: the 2-column card grid (24 edge, 16 gap, 64 title header). Use it for every card list.
+  - Pokémon grid: `PokemonGrid` in `src/components/pokemon-grid.tsx`, props `{ data, title?, onPress, onOptionsPress, emptyText?, ref? }`: the 2-column card grid (24 edge, 16 gap, 64 title header; without a title no header and 24 on top). Dragging closes the keyboard, card taps work with the keyboard open. `ref` is the `FlatList` (e.g. `scrollToOffset`). Use it for every card list.
   - Heart icon: `HeartIcon` in `src/components/heart-icon.tsx`, props `{ filled, size, color }`: outline symbol, or the Figma PNG `assets/images/heart-filled.png` (`@2x`, `@3x`) tinted when filled.
   - Formatting helpers: `src/utils/pokemon.ts` (`getIdFromUrl`, `parsePokemonId`, `formatNumber`, `formatName`, `getShareText`, `getSpriteUrl`, `getArtworkUrl`, `formatWeight`, `formatHeight`, `formatBaseExperience`, `getStatFraction`).
   - Detail helpers: `src/utils/pokemon-detail.ts` (`PokemonDetail`, `getStatRows`, `getVisibleAbilities`, `getOfficialName`, `getDisplayName`) and `src/utils/evolution.ts` (`flattenEvolutionChain`, `getEvolutionEntries`).
@@ -41,6 +44,7 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
   - In a grid, a lone card in the last row keeps the same width as the others: give each cell a fixed share of the row (e.g. `width: '50%'`), not `flex: 1`.
   - A child of `stickyHeaderIndices` is wrapped by React Native, so its `onLayout` `y` is 0. Measure the views above it instead.
   - For a selected state use `aria-selected`, not `accessibilityState`: the web build ignores `accessibilityState`.
+  - A mode that starts on a field's `onFocus` (search mode) must also start in `onChangeText`: focus events do not always arrive (seen on web when the window is not focused), and then text shows without the mode.
 - Specs: `specs/product.md` describes the app, `specs/features/<name>.md` one feature each. Design screenshots are in `specs/design/`.
 - For an issue: first read it with `gh issue view <number>` and read its spec file. Then post a plan (which files, how, what you are unsure about) and a `- [ ]` task list as one comment on the issue with `gh issue comment`. Wait for my go. Tick off tasks with `gh issue comment --edit-last` while you build.
 

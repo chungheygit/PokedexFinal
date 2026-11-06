@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { type Ref, useCallback } from 'react';
 import { FlatList, Platform, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { getPokemonCardHeight, PokemonCard, type PokemonCardProps } from '@/components/pokemon-card';
@@ -8,16 +8,20 @@ import { useTheme } from '@/hooks/use-theme';
 const HEADER_HEIGHT = 64;
 const EDGE = Spacing.four;
 const GAP = Spacing.three;
+/** Space above the first row when there is no title (`search.png`). */
+const TOP_WITHOUT_TITLE = Spacing.four;
 
 type GridItem = { id: number; name: string };
 
 type PokemonGridProps = {
   data: readonly GridItem[];
-  title: string;
+  /** Shown in a 64 header above the cards; without it the cards start 24 from the top. */
+  title?: string;
   onPress: PokemonCardProps['onPress'];
   onOptionsPress: PokemonCardProps['onOptionsPress'];
   /** Shown under the title when `data` is empty. */
   emptyText?: string;
+  ref?: Ref<FlatList<GridItem>>;
 };
 
 function keyExtractor(item: GridItem) {
@@ -25,25 +29,27 @@ function keyExtractor(item: GridItem) {
 }
 
 /**
- * The 2-column card grid with a title on top: 24 from the screen edges, 16
- * between cards, every card half a row (also a lone last card).
+ * The 2-column card grid with an optional title on top: 24 from the screen
+ * edges, 16 between cards, every card half a row (also a lone last card).
+ * Dragging closes the keyboard; a tap on a card works with the keyboard open.
  */
-export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText }: PokemonGridProps) {
+export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText, ref }: PokemonGridProps) {
   const theme = useTheme();
 
   // Two cards and one gap between the screen edges (390 wide → 163 per card).
   const { width } = useWindowDimensions();
   const cardHeight = getPokemonCardHeight((width - 2 * EDGE - GAP) / 2);
   const rowHeight = cardHeight + GAP;
+  const topHeight = title === undefined ? TOP_WITHOUT_TITLE : HEADER_HEIGHT;
 
   // With numColumns, FlatList asks for the layout of a row, not of a card.
   const getItemLayout = useCallback(
     (_: unknown, index: number) => ({
       length: rowHeight,
-      offset: HEADER_HEIGHT + rowHeight * index,
+      offset: topHeight + rowHeight * index,
       index,
     }),
-    [rowHeight],
+    [rowHeight, topHeight],
   );
 
   const renderItem = useCallback(
@@ -57,17 +63,20 @@ export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText }:
 
   return (
     <FlatList
+      ref={ref}
       data={data}
       numColumns={2}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       getItemLayout={getItemLayout}
       ListHeaderComponent={
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]} accessibilityRole="header">
-            {title}
-          </Text>
-        </View>
+        title === undefined ? undefined : (
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: theme.text }]} accessibilityRole="header">
+              {title}
+            </Text>
+          </View>
+        )
       }
       ListEmptyComponent={
         emptyText ? (
@@ -75,7 +84,9 @@ export function PokemonGrid({ data, title, onPress, onOptionsPress, emptyText }:
         ) : undefined
       }
       columnWrapperStyle={styles.row}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, title === undefined && styles.contentWithoutTitle]}
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
       initialNumToRender={10}
       maxToRenderPerBatch={10}
       windowSize={11}
@@ -89,6 +100,10 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: EDGE - GAP / 2,
     paddingBottom: Spacing.three,
+  },
+  // getItemLayout counts this instead of the header.
+  contentWithoutTitle: {
+    paddingTop: TOP_WITHOUT_TITLE,
   },
   header: {
     height: HEADER_HEIGHT,

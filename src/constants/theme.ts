@@ -17,6 +17,8 @@ const palette = {
   text: '#111532',
   textSecondary: '#84838B',
   backdrop: 'rgba(17, 21, 50, 0.4)',
+  /** Soft shadow under the search field (`home.png`). */
+  shadow: 'rgba(17, 21, 50, 0.08)',
   /** Type chip on the light blue detail header. */
   chip: '#DDE3EF',
   /** Line under the detail tab bar. */
