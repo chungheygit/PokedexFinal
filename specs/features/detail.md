@@ -103,7 +103,7 @@ See everything about one Pokémon: its artwork, types, base info, stats and evol
 
 ## Out of Scope
 
-- The ♥ button (favorites feature). Nothing is drawn in its place yet.
+- The heart button: built by the favorites feature, see `favorites.md`.
 - Share on the detail screen: the Figma detail has no share button. Share is in the ⋮ menu on the list.
 - Evolution conditions (level, item, trade), moves, locations, shiny or form switching.
 - Official names on the evolution cards (would need a species request per card).
