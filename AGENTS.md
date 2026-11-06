@@ -7,6 +7,7 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
 - Shared setup (API client, query client, database): reuse what is listed here, never add a second one. When you set up something new that other features will use, add a line here: what it is and where it lives.
   - Query client: `QueryClientProvider` in `src/app/_layout.tsx`.
   - Theme: colours, spacing and radius in `src/constants/theme.ts`. Never a hex code in a component.
+  - Favorite red: `favorite` in the theme palette (`theme.favorite`), for the filled heart.
   - Type colours: `TypeColors` in `theme.ts` (all 18 types); use `getTypeColor(type, theme.textSecondary)` so an unknown type falls back instead of crashing.
   - Error state: `src/components/error-view.tsx`. `onRetry` is optional: leave it out when retrying cannot help (an invalid id).
   - API client: `src/services/pokemon-api.ts` (`API_URL`, `fetchPokemonList`, `fetchPokemon`, `fetchPokemonSpecies`, `fetchEvolutionChain`). Add new PokeAPI calls there, typed with only the fields used.
@@ -15,10 +16,19 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
     - `usePokemon(id)` in `src/hooks/use-pokemon.ts`, key `['pokemon', id]`, returns `PokemonDetail` (types, stats rows, visible abilities, `speciesId`). Compare can reuse it.
     - `usePokemonSpecies(speciesId)` in `src/hooks/use-pokemon-species.ts`, key `['species', speciesId]`, returns `{ id, name, officialName, chainId }`. The species id comes from `species.url`, never the Pokémon id (forms share their species).
     - `useEvolutionChain(chainId)` in `src/hooks/use-evolution-chain.ts`, key `['evolution-chain', chainId]`, returns the chain flattened by stage.
-  - Detail route: `/pokemon/[id]` with optional `name` (the API slug) so the header has a name at once: `router.push({ pathname: '/pokemon/[id]', params: { id: String(id), name } })`.
+  - Detail route: `/pokemon/[id]` with optional `name` (the API slug) so the header has a name at once: `router.push(getPokemonHref(id, name))` (`src/utils/pokemon.ts`).
+  - Database: `getDatabase()` in `src/services/database.ts` (expo-sqlite, `pokedex.db`), opened lazily once, creates the tables; a failed open is forgotten so a retry opens it again. Add new tables to its schema. `database.web.ts` rejects (no SQLite on web), so web still builds.
+  - Favorites SQL: `src/services/favorites.ts` (`getFavorites`, `addFavorite`, `removeFavorite`), table `favorites (id, name, created_at ms)`. `SIMULATE_SAVE_ERROR` there (dev only, keep `false`) makes add/remove fail after 1 s.
+  - Favorites hooks in `src/hooks/use-favorites.ts`, all on key `['favorites']`:
+    - `useFavorites()`: `{ id, name, createdAt }[]`, newest first.
+    - `useIsFavorite(id)`: same query with `select`; `undefined` while loading, after an error or without an id.
+    - `useSetFavorite()`: returns `(input: { id, name, favorite }) => void`, the state to end in (not a toggle). Optimistic, rolls back with an alert on error, `mutationKey: ['favorites']`.
   - Fonts: Rubik from `assets/fonts/`, loaded in `src/app/_layout.tsx`; names in `Fonts` in `theme.ts` (`regular`, `medium`, `semiBold`, `bold`).
   - Pokémon card: `PokemonCard` in `src/components/pokemon-card.tsx`, props `{ id, name, onPress, onOptionsPress }` (both callbacks get `{ id, name }`), fills its parent's width with a square image part; `getPokemonCardHeight(width)` gives its height for `getItemLayout`.
-  - Options menu: `OptionsMenu` in `src/components/options-menu.tsx`, a bottom-sheet `Modal`; render once per screen, pass `items`.
+  - Options menu: `OptionsMenu` in `src/components/options-menu.tsx`, a bottom-sheet `Modal`; render once per screen, pass `items`. An item's `icon` is a symbol name or `({ size, color }) => ReactNode` for a PNG.
+  - Pokémon ⋮ menu: `PokemonOptionsMenu` in `src/components/pokemon-options-menu.tsx`, props `{ pokemon, visible, onClose }`: Open / Add or Remove favorite / Share. Use it on every screen with Pokémon cards.
+  - Pokémon grid: `PokemonGrid` in `src/components/pokemon-grid.tsx`, props `{ data, title, onPress, onOptionsPress, emptyText? }`: the 2-column card grid (24 edge, 16 gap, 64 title header). Use it for every card list.
+  - Heart icon: `HeartIcon` in `src/components/heart-icon.tsx`, props `{ filled, size, color }`: outline symbol, or the Figma PNG `assets/images/heart-filled.png` (`@2x`, `@3x`) tinted when filled.
   - Formatting helpers: `src/utils/pokemon.ts` (`getIdFromUrl`, `parsePokemonId`, `formatNumber`, `formatName`, `getShareText`, `getSpriteUrl`, `getArtworkUrl`, `formatWeight`, `formatHeight`, `formatBaseExperience`, `getStatFraction`).
   - Detail helpers: `src/utils/pokemon-detail.ts` (`PokemonDetail`, `getStatRows`, `getVisibleAbilities`, `getOfficialName`, `getDisplayName`) and `src/utils/evolution.ts` (`flattenEvolutionChain`, `getEvolutionEntries`).
   - Pokémon image with fallback: `PokemonImage` in `src/components/pokemon-image.tsx`, props `{ uri, style, placeholderSize }`; shows the tinted Pokéball when the image fails. Use it for any sprite or artwork.
@@ -27,6 +37,7 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
 - Lessons from earlier issues:
   - Before saying a UI task is done, compare sizes and spacing with the screenshots in `specs/design/` (card size, edge margins, gaps), not only colours and fonts.
   - Before using an `md` icon (Material Symbols via expo-symbols), check that the glyph is in the bundled font: a name can be in the type list but missing from the font, and then it draws a missing-glyph box. If it is missing, use a PNG from the Figma.
+  - The bundled Material Symbols font is the unfilled one: `favorite` and `favorite_border` (and other `_border` pairs) draw the same outline glyph. For a filled icon use a PNG from the Figma.
   - In a grid, a lone card in the last row keeps the same width as the others: give each cell a fixed share of the row (e.g. `width: '50%'`), not `flex: 1`.
   - A child of `stickyHeaderIndices` is wrapped by React Native, so its `onLayout` `y` is 0. Measure the views above it instead.
   - For a selected state use `aria-selected`, not `accessibilityState`: the web build ignores `accessibilityState`.

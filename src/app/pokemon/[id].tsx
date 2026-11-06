@@ -12,6 +12,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ErrorView } from '@/components/error-view';
+import { HeartIcon } from '@/components/heart-icon';
 import { AboutTab } from '@/components/pokemon-detail/about-tab';
 import { DetailHeader, NAME_SCROLL_RANGE } from '@/components/pokemon-detail/detail-header';
 import {
@@ -23,15 +24,17 @@ import { EvolutionTab } from '@/components/pokemon-detail/evolution-tab';
 import { StatsTab } from '@/components/pokemon-detail/stats-tab';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useEvolutionChain } from '@/hooks/use-evolution-chain';
+import { useIsFavorite, useSetFavorite } from '@/hooks/use-favorites';
 import { usePokemon } from '@/hooks/use-pokemon';
 import { usePokemonSpecies } from '@/hooks/use-pokemon-species';
 import { useTheme } from '@/hooks/use-theme';
 import { type EvolutionEntry, getEvolutionEntries } from '@/utils/evolution';
-import { parsePokemonId } from '@/utils/pokemon';
+import { getPokemonHref, parsePokemonId } from '@/utils/pokemon';
 import { getDisplayName } from '@/utils/pokemon-detail';
 
 const BAR_HEIGHT = 56;
-const BACK_SIZE = 40;
+const BUTTON_SIZE = 40;
+const ICON_SIZE = 24;
 
 function goBack() {
   // Opened from a deep link there is no screen to go back to: go to the list.
@@ -43,7 +46,7 @@ function goBack() {
 }
 
 function openPokemon(entry: EvolutionEntry) {
-  router.push({ pathname: '/pokemon/[id]', params: { id: String(entry.id), name: entry.name } });
+  router.push(getPokemonHref(entry.id, entry.name));
 }
 
 export default function PokemonDetailScreen() {
@@ -58,6 +61,8 @@ export default function PokemonDetailScreen() {
   const species = speciesQuery.data;
   const chainQuery = useEvolutionChain(species?.chainId);
   const name = getDisplayName(params.name, pokemon, species?.officialName);
+  const isFavorite = useIsFavorite(id);
+  const setFavorite = useSetFavorite();
 
   const [tab, setTab] = useState<DetailTab>('about');
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -96,13 +101,30 @@ export default function PokemonDetailScreen() {
         accessibilityRole="button"
         accessibilityLabel="Back"
         hitSlop={Spacing.two}
-        style={({ pressed }) => [styles.back, { opacity: pressed ? 0.5 : 1 }]}>
+        style={({ pressed }) => [styles.button, { opacity: pressed ? 0.5 : 1 }]}>
         <SymbolView
           name={{ ios: 'arrow.left', android: 'arrow_back', web: 'arrow_back' }}
-          size={24}
+          size={ICON_SIZE}
           tintColor={theme.text}
         />
       </Pressable>
+      {/* Fixed slot: the heart appears once the slug and the favorites are known, without moving anything. */}
+      <View style={styles.button}>
+        {pokemon && isFavorite !== undefined && (
+          <Pressable
+            onPress={() => setFavorite({ id: pokemon.id, name: pokemon.name, favorite: !isFavorite })}
+            accessibilityRole="button"
+            accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            hitSlop={Spacing.two}
+            style={({ pressed }) => [styles.button, { opacity: pressed ? 0.5 : 1 }]}>
+            <HeartIcon
+              filled={isFavorite}
+              size={ICON_SIZE}
+              color={isFavorite ? theme.favorite : theme.text}
+            />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 
@@ -181,19 +203,20 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.two,
   },
-  back: {
-    width: BACK_SIZE,
-    height: BACK_SIZE,
+  button: {
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Centred on the screen; the side padding keeps it clear of the back button.
+  // Centred on the screen; the side padding keeps it clear of the back and heart buttons.
   compactName: {
     position: 'absolute',
-    left: Spacing.two + BACK_SIZE,
-    right: Spacing.two + BACK_SIZE,
+    left: Spacing.two + BUTTON_SIZE,
+    right: Spacing.two + BUTTON_SIZE,
     height: BAR_HEIGHT,
     lineHeight: BAR_HEIGHT,
     textAlign: 'center',

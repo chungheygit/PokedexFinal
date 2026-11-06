@@ -23,6 +23,11 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="favorites">
+        <NativeTabs.Trigger.Label>Favorites</NativeTabs.Trigger.Label>
+        {/* `favorite` (U+E87D) is in the bundled Material Symbols font and draws the outline heart, as in the Figma. */}
+        <NativeTabs.Trigger.Icon sf="heart" md="favorite" />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

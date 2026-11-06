@@ -23,6 +23,8 @@ const palette = {
   divider: '#E4E4E4',
   /** Empty part of a stat bar. */
   track: '#F2F2F2',
+  /** The filled heart of a favorite (measured from `detail-stats.png`). */
+  favorite: '#FF395C',
 } as const;
 
 /**

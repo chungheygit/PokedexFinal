@@ -1,8 +1,15 @@
+import type { Href } from 'expo-router';
+
 const SPRITE_BASE_URL =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 
 /** Stat value that fills the whole bar. A few Pokémon go above it. */
 const MAX_STAT = 150;
+
+/** The detail route for a Pokémon; `name` (the slug) lets the header show a name at once. */
+export function getPokemonHref(id: number, name: string): Href {
+  return { pathname: '/pokemon/[id]', params: { id: String(id), name } };
+}
 
 /** `https://pokeapi.co/api/v2/pokemon/25/` → `25`. */
 export function getIdFromUrl(url: string): number {

@@ -1,4 +1,5 @@
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import type { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,10 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+const ICON_SIZE = 20;
+
 export type OptionsMenuItem = {
   key: string;
   label: string;
-  icon: SymbolViewProps['name'];
+  /** A symbol name, or a function that draws the icon (e.g. a PNG) at this size and colour. */
+  icon: SymbolViewProps['name'] | ((props: { size: number; color: string }) => ReactNode);
   onPress: () => void;
 };
 
@@ -57,7 +61,11 @@ export function OptionsMenu({ visible, items, onClose }: OptionsMenuProps) {
                 item.onPress();
               }}
               style={({ pressed }) => [styles.item, { opacity: pressed ? 0.5 : 1 }]}>
-              <SymbolView name={item.icon} size={20} tintColor={theme.text} />
+              {typeof item.icon === 'function' ? (
+                item.icon({ size: ICON_SIZE, color: theme.text })
+              ) : (
+                <SymbolView name={item.icon} size={ICON_SIZE} tintColor={theme.text} />
+              )}
               <Text style={[styles.label, { color: theme.text }]}>{item.label}</Text>
             </Pressable>
           ))}
