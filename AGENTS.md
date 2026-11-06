@@ -7,18 +7,29 @@ A Pokédex app on PokeAPI (https://pokeapi.co/api/v2, public, no key), following
 - Shared setup (API client, query client, database): reuse what is listed here, never add a second one. When you set up something new that other features will use, add a line here: what it is and where it lives.
   - Query client: `QueryClientProvider` in `src/app/_layout.tsx`.
   - Theme: colours, spacing and radius in `src/constants/theme.ts`. Never a hex code in a component.
-  - Error state: `src/components/error-view.tsx`.
-  - API client: `src/services/pokemon-api.ts` (`API_URL`, `fetchPokemonList`). Add new PokeAPI calls there.
+  - Type colours: `TypeColors` in `theme.ts` (all 18 types); use `getTypeColor(type, theme.textSecondary)` so an unknown type falls back instead of crashing.
+  - Error state: `src/components/error-view.tsx`. `onRetry` is optional: leave it out when retrying cannot help (an invalid id).
+  - API client: `src/services/pokemon-api.ts` (`API_URL`, `fetchPokemonList`, `fetchPokemon`, `fetchPokemonSpecies`, `fetchEvolutionChain`). Add new PokeAPI calls there, typed with only the fields used.
   - Pokémon list query: `usePokemonList` in `src/hooks/use-pokemon-list.ts`, key `['pokemon', 'list']`, `{ id, name }[]`. Search reuses it.
+  - Detail queries (all `staleTime: Infinity`, `retry: 1`, ids are numbers, `skipToken` while the id is unknown):
+    - `usePokemon(id)` in `src/hooks/use-pokemon.ts`, key `['pokemon', id]`, returns `PokemonDetail` (types, stats rows, visible abilities, `speciesId`). Compare can reuse it.
+    - `usePokemonSpecies(speciesId)` in `src/hooks/use-pokemon-species.ts`, key `['species', speciesId]`, returns `{ id, name, officialName, chainId }`. The species id comes from `species.url`, never the Pokémon id (forms share their species).
+    - `useEvolutionChain(chainId)` in `src/hooks/use-evolution-chain.ts`, key `['evolution-chain', chainId]`, returns the chain flattened by stage.
+  - Detail route: `/pokemon/[id]` with optional `name` (the API slug) so the header has a name at once: `router.push({ pathname: '/pokemon/[id]', params: { id: String(id), name } })`.
   - Fonts: Rubik from `assets/fonts/`, loaded in `src/app/_layout.tsx`; names in `Fonts` in `theme.ts` (`regular`, `medium`, `semiBold`, `bold`).
-  - Pokémon card: `PokemonCard` in `src/components/pokemon-card.tsx`, props `{ id, name, onPress, onOptionsPress }`, fills its parent's width with a square image part; `getPokemonCardHeight(width)` gives its height for `getItemLayout`.
+  - Pokémon card: `PokemonCard` in `src/components/pokemon-card.tsx`, props `{ id, name, onPress, onOptionsPress }` (both callbacks get `{ id, name }`), fills its parent's width with a square image part; `getPokemonCardHeight(width)` gives its height for `getItemLayout`.
   - Options menu: `OptionsMenu` in `src/components/options-menu.tsx`, a bottom-sheet `Modal`; render once per screen, pass `items`.
-  - Formatting helpers: `src/utils/pokemon.ts` (`getIdFromUrl`, `formatNumber`, `formatName`, `getShareText`, `getSpriteUrl`).
+  - Formatting helpers: `src/utils/pokemon.ts` (`getIdFromUrl`, `parsePokemonId`, `formatNumber`, `formatName`, `getShareText`, `getSpriteUrl`, `getArtworkUrl`, `formatWeight`, `formatHeight`, `formatBaseExperience`, `getStatFraction`).
+  - Detail helpers: `src/utils/pokemon-detail.ts` (`PokemonDetail`, `getStatRows`, `getVisibleAbilities`, `getOfficialName`, `getDisplayName`) and `src/utils/evolution.ts` (`flattenEvolutionChain`, `getEvolutionEntries`).
+  - Pokémon image with fallback: `PokemonImage` in `src/components/pokemon-image.tsx`, props `{ uri, style, placeholderSize }`; shows the tinted Pokéball when the image fails. Use it for any sprite or artwork.
+  - Type chip: `TypeChip` in `src/components/type-chip.tsx`, prop `type` (slug): coloured dot + name.
   - Pokéball icon: `assets/images/tabIcons/pokeball.png` (`@2x`, `@3x`), exported from the Figma. Tab icon and the card's no-sprite placeholder (tinted with `tintColor`).
 - Lessons from earlier issues:
   - Before saying a UI task is done, compare sizes and spacing with the screenshots in `specs/design/` (card size, edge margins, gaps), not only colours and fonts.
   - Before using an `md` icon (Material Symbols via expo-symbols), check that the glyph is in the bundled font: a name can be in the type list but missing from the font, and then it draws a missing-glyph box. If it is missing, use a PNG from the Figma.
   - In a grid, a lone card in the last row keeps the same width as the others: give each cell a fixed share of the row (e.g. `width: '50%'`), not `flex: 1`.
+  - A child of `stickyHeaderIndices` is wrapped by React Native, so its `onLayout` `y` is 0. Measure the views above it instead.
+  - For a selected state use `aria-selected`, not `accessibilityState`: the web build ignores `accessibilityState`.
 - Specs: `specs/product.md` describes the app, `specs/features/<name>.md` one feature each. Design screenshots are in `specs/design/`.
 - For an issue: first read it with `gh issue view <number>` and read its spec file. Then post a plan (which files, how, what you are unsure about) and a `- [ ]` task list as one comment on the issue with `gh issue comment`. Wait for my go. Tick off tasks with `gh issue comment --edit-last` while you build.
 

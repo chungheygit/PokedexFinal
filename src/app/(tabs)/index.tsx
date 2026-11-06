@@ -28,8 +28,8 @@ function keyExtractor(item: PokemonListItem) {
   return String(item.id);
 }
 
-function openPokemon(id: number) {
-  router.push({ pathname: '/pokemon/[id]', params: { id: String(id) } });
+function openPokemon(pokemon: PokemonListItem) {
+  router.push({ pathname: '/pokemon/[id]', params: { id: String(pokemon.id), name: pokemon.name } });
 }
 
 function sharePokemon(id: number, name: string) {
@@ -86,7 +86,7 @@ export default function HomeScreen() {
           key: 'open',
           label: 'Open Pokémon',
           icon: { ios: 'arrow.up.left.and.arrow.down.right', android: 'open_in_full' },
-          onPress: () => openPokemon(selected.id),
+          onPress: () => openPokemon(selected),
         },
         {
           key: 'share',

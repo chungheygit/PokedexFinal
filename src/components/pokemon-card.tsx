@@ -21,7 +21,7 @@ export function getPokemonCardHeight(width: number): number {
 export type PokemonCardProps = {
   id: number;
   name: string;
-  onPress: (id: number) => void;
+  onPress: (pokemon: { id: number; name: string }) => void;
   onOptionsPress: (pokemon: { id: number; name: string }) => void;
 };
 
@@ -33,7 +33,7 @@ function PokemonCardComponent({ id, name, onPress, onOptionsPress }: PokemonCard
   return (
     <View style={[styles.card, { backgroundColor: theme.card }]}>
       <Pressable
-        onPress={() => onPress(id)}
+        onPress={() => onPress({ id, name })}
         accessibilityRole="button"
         accessibilityLabel={`${displayName}, number ${id}`}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>

@@ -17,7 +17,43 @@ const palette = {
   text: '#111532',
   textSecondary: '#84838B',
   backdrop: 'rgba(17, 21, 50, 0.4)',
+  /** Type chip on the light blue detail header. */
+  chip: '#DDE3EF',
+  /** Line under the detail tab bar. */
+  divider: '#E4E4E4',
+  /** Empty part of a stat bar. */
+  track: '#F2F2F2',
 } as const;
+
+/**
+ * One colour per Pokémon type. Grass, poison, fire and electric are from the
+ * Figma; the others are the usual type hues at the same strength.
+ */
+export const TypeColors: Readonly<Record<string, string>> = {
+  normal: '#9DA0AA',
+  fire: '#FF5475',
+  water: '#4A90DA',
+  grass: '#62B957',
+  electric: '#FFCF00',
+  ice: '#61CEC0',
+  fighting: '#D04164',
+  poison: '#A074BF',
+  ground: '#DD7748',
+  flying: '#748FC9',
+  psychic: '#EA5D60',
+  bug: '#8CB230',
+  rock: '#BAAB82',
+  ghost: '#556AAE',
+  dragon: '#0F6AC0',
+  dark: '#58575F',
+  steel: '#417D9A',
+  fairy: '#ED6EC7',
+};
+
+/** The colour of a type slug, or `fallback` for a type we don't know (e.g. a future one). */
+export function getTypeColor(type: string, fallback: string): string {
+  return Object.hasOwn(TypeColors, type) ? TypeColors[type] : fallback;
+}
 
 export const Colors = {
   light: {

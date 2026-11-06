@@ -32,7 +32,8 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="pokemon/[id]" options={{ title: 'Pokémon' }} />
+          {/* The detail screen draws its own header (← and the name fading in on scroll). */}
+          <Stack.Screen name="pokemon/[id]" options={{ headerShown: false }} />
         </Stack>
       </QueryClientProvider>
     </ThemeProvider>

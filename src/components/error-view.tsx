@@ -5,7 +5,8 @@ import { useTheme } from '@/hooks/use-theme';
 
 type ErrorViewProps = {
   message: string;
-  onRetry: () => void;
+  /** Shows a "Try again" button. Leave out when retrying cannot help (e.g. an invalid id). */
+  onRetry?: () => void;
 };
 
 export function ErrorView({ message, onRetry }: ErrorViewProps) {
@@ -14,15 +15,17 @@ export function ErrorView({ message, onRetry }: ErrorViewProps) {
   return (
     <View style={styles.container}>
       <Text style={[styles.message, { color: theme.text }]}>{message}</Text>
-      <Pressable
-        onPress={onRetry}
-        accessibilityRole="button"
-        style={({ pressed }) => [
-          styles.button,
-          { backgroundColor: theme.primary, opacity: pressed ? 0.6 : 1 },
-        ]}>
-        <Text style={[styles.buttonText, { color: theme.onPrimary }]}>Try again</Text>
-      </Pressable>
+      {onRetry && (
+        <Pressable
+          onPress={onRetry}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.button,
+            { backgroundColor: theme.primary, opacity: pressed ? 0.6 : 1 },
+          ]}>
+          <Text style={[styles.buttonText, { color: theme.onPrimary }]}>Try again</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
