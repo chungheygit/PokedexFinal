@@ -25,7 +25,7 @@ Look up a Pokémon.
   - `/pokemon/{id}`: types, stats, height, weight, base experience, abilities. For detail and compare.
   - The species, through `species.url` from `/pokemon/{id}`: the official name and the link to the evolution chain.
   - `/evolution-chain/{id}`: the evolution chain.
-  - Images by id from the PokeAPI sprites repo: the sprite on cards, the official artwork on detail.
+  - Images by id from the PokeAPI sprites repo: the sprite on cards, the official artwork on detail and compare.
 - **Stored on the phone**: table `favorites` in SQLite: `id`, `name`, `created_at`.
 
 ## Technical choices
@@ -48,14 +48,14 @@ Look up a Pokémon.
 
 ## Technical core
 
-- [ ] Runs in Expo Go
-- [ ] Live data through TanStack Query
-- [ ] At least 2 screens with Expo Router
-- [ ] Something in SQLite that survives a restart: favorites
-- [ ] Loading and error state on every load
-- [ ] One native feature: Share, in the options menu
-- [ ] TypeScript and ESLint without errors
-- [ ] UI, data and logic in separate files
+- [x] Runs in Expo Go
+- [x] Live data through TanStack Query
+- [x] At least 2 screens with Expo Router
+- [x] Something in SQLite that survives a restart: favorites
+- [x] Loading and error state on every load
+- [x] One native feature: Share, in the options menu
+- [x] TypeScript and ESLint without errors
+- [x] UI, data and logic in separate files
 
 ## Optional
 
@@ -69,7 +69,7 @@ Look up a Pokémon.
 - [ ] Tests: one per feature on the logic, `npm test` passes
 - [ ] CI: lint and tsc on every push
 - [ ] Accessibility: button labels, largest text size
-- [ ] Optimistic update
+- [x] Optimistic update
 
 ## Out of scope
 
